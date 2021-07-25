@@ -1,5 +1,3 @@
-;テストのコメント行 Day13
-
 JOYPAD1 = $4016
 JOYPAD2 = $4017
 
@@ -335,15 +333,6 @@ do_joypad:  ;何か押された時の処理
     jsr chr_style_2
 :
 
-;    ;キャラのx軸が変化したら、8dot移動
-;    lda player1_x
-;    cmp last_player1_x
-;    beq :+
-;    sta last_player1_x
-;    lda #$00
-;    sta move_count
-;    jsr player_move
-;:
     jmp MainLoop
 
 nmi:
