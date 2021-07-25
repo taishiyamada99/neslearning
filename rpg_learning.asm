@@ -32,8 +32,6 @@ player1_y:      .res 1
 player1_tile:   .res 1 ;タイル
 player1_dist:   .res 1 ;向き
 move_count:     .res 1 ;移動中かどうかの判定フラグ（カウンター）
-move_count_last:    .res 1
-last_player1_x: .res 1
 
 .segment "STARTUP"
 Reset:
@@ -303,9 +301,10 @@ Left_Down:
     jmp do_joypad
 
 Right_Down:
-    inc player1_x
+ ;   inc player1_x
     lda #DIST_RIGHT
     sta player1_dist
+    jsr player_move_right
     jmp do_joypad
 
 UpRight_Down:
@@ -336,7 +335,6 @@ do_joypad:  ;何か押された時の処理
     jmp MainLoop
 
 nmi:
-    inc move_count
     inc count2
     inc count
     ;キャラ足踏み
@@ -393,20 +391,25 @@ chr_style_2:
     jsr Player_tile_change
     rts
 
-;BGスクロール(8dot)
-player_move:
+;BGスクロール(右に移動)
+player_move_right:
     lda #$00
-    sta move_count_last
-    ldx player1_x
-:
-    lda move_count_last
-    cmp move_count
-    bne :-
-    stx $2005
-    inx 
-    lda move_count
-    cmp #08
-    bne :-
+    sta move_count  ;move_countを0に初期化
+    ldy count2
+player_move_right_1:
+    cpy count2       ;nmiを待つ (countの変化を待つ)
+    beq player_move_right_1
+
+    inc player1_x
+    lda player1_x
+    sta $2005       ;x
+    lda player1_y
+    sta $2005       ;y
+
+    inc move_count
+    ldx move_count
+    cpx #15         ;move_countを15までなったら終了
+    bne player_move_right_1 
     rts
 
 ; サウンド　矩形波;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
