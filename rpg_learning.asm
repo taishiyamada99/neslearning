@@ -283,28 +283,26 @@ BUTTON_RIGHT  = 1 << 0
     jmp nothing_joypad
 
 Up_Down:
-    ;dec player1_y
     lda #DIST_UP
     sta player1_dist
     jmp do_joypad
 
 Down_Down:
-    ;inc player1_y
     lda #DIST_DOWN
     sta player1_dist
     jmp do_joypad
 
 Left_Down:
-    ;dec player1_x
     lda #DIST_LEFT
     sta player1_dist
+    jsr sub_player_dist_change
     jsr player_move_left
     jmp do_joypad
 
 Right_Down:
-    ;inc player1_x
     lda #DIST_RIGHT
     sta player1_dist
+    jsr sub_player_dist_change
     jsr player_move_right
     jmp do_joypad
 
@@ -325,13 +323,7 @@ nothing_joypad:   ; 何も押されていないときの処理
     jmp MainLoop
 
 do_joypad:  ;何か押された時の処理
-    ;キャラ向き変更発生時は、すぐにキャラ書き換え
-    lda player1_dist
-    cmp last_dist
-    beq :+
-    sta last_dist
-    jsr chr_style_2
-:
+
 
     jmp MainLoop
 
@@ -353,7 +345,7 @@ sprit_dma:
 
 ;;;;;;;;;;;;;;;;;;;;;;;ここから、サブルーチン
 
-Player_tile_change:
+sub_player_tile_change:
     ; reg A : キャラのタイル番号を入れる($c0とか)
     ; reg X : キャラの番号($02xxのxx部分)を入れる ($00, $10, $20とか)
     sta $0201, x
@@ -382,14 +374,22 @@ chr_style_change:
     sta temp1
 :
 
-;タイルを入れ替える
-chr_style_2:
+chr_style_2:        ;タイルを入れ替える/この部分だけでも使う
     lda player1_tile
     clc
     adc player1_dist
     adc temp1
     ldx #$00
-    jsr Player_tile_change
+    jsr sub_player_tile_change
+    rts
+
+sub_player_dist_change:     ;キャラ向き変更
+    lda player1_dist
+    cmp last_dist
+    beq :+
+    sta last_dist
+    jsr chr_style_2
+:
     rts
 
 ;BGスクロール(右に移動)
