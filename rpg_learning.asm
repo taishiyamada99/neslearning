@@ -230,6 +230,10 @@ SetWindowPosition:
 ;    lda #%00010110  ; Enable sprites and BG:Disabled(bit3 = false)
     sta $2001
 
+    lda #%10000000  ; enable NMI change BG $0000 Sprit $1000, VRAM inc 1
+    sta $2000
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MainLoop:
     bit $2002
@@ -280,6 +284,9 @@ BUTTON_RIGHT  = 1 << 0
     cmp #BUTTON_RIGHT
     beq Right_Down
 
+    cmp #BUTTON_A
+    beq a_down
+
     jmp nothing_joypad
 
 Up_Down:
@@ -318,13 +325,14 @@ DownRight_Down:
 DownLeft_Down:
     jmp do_joypad
 
-nothing_joypad:   ; 何も押されていないときの処理
+a_down:
+    jsr load_win_status_data
+    jmp do_joypad
 
+nothing_joypad:   ; 何も押されていないときの処理
     jmp MainLoop
 
 do_joypad:  ;何か押された時の処理
-
-
     jmp MainLoop
 
 nmi:
@@ -432,6 +440,62 @@ player_move_left:
     bne :-- 
     rts
 
+;BGにステータスウインドウを表示（練習）
+load_win_status_data:
+    lda #$20
+    sta $2006
+    lda #$00
+    sta $2006
+
+    ldy #$00
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #$08
+    bne :-
+
+    lda #$20
+    sta $2006
+    lda #$20
+    sta $2006
+
+    ldy #$00
+:
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #$08
+    bne :-
+
+    lda #$20
+    sta $2006
+    lda #$40
+    sta $2006
+
+    ldy #$00
+:
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #$08
+    bne :-
+
+    lda #$20
+    sta $2006
+    lda #$60
+    sta $2006
+
+    ldy #$00
+:
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #$08
+    bne :-
+    
+    rts
+
 ; サウンド　矩形波;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     lda $4015
@@ -477,6 +541,12 @@ PaletteData_BG:
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
+
+win_status_data:
+    .byte $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
+    .byte $F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1
+    .byte $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
+    .byte $F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1,$F1
 
 WorldData:
     .incbin "map01.bin"
