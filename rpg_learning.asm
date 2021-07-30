@@ -442,6 +442,10 @@ player_move_left:
 
 ;BGにステータスウインドウを表示（練習）
 load_win_status_data:
+:
+    BIT $2002
+    BPL :-
+
     lda #$20
     sta $2006
     lda #$00
@@ -449,45 +453,6 @@ load_win_status_data:
 
     ldy #$00
  :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #$08
-    bne :-
-
-    lda #$20
-    sta $2006
-    lda #$20
-    sta $2006
-
-    ldy #$00
-:
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #$08
-    bne :-
-
-    lda #$20
-    sta $2006
-    lda #$40
-    sta $2006
-
-    ldy #$00
-:
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #$08
-    bne :-
-
-    lda #$20
-    sta $2006
-    lda #$60
-    sta $2006
-
-    ldy #$00
-:
     lda win_status_data, y
     sta $2007
     iny
