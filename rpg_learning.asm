@@ -442,12 +442,19 @@ player_move_left:
 
 ;BGにステータスウインドウを表示（練習）
 load_win_status_data:
+
+;nmiまってみる
+    lda count2
+:
+    cmp count2
+    beq :-
+
+;1行目描画
     lda #$22
     sta $2006
     lda #$CA
     sta $2006
 
-;1行目描画
     ldy #$00
  :
     lda win_status_data, y
@@ -481,6 +488,83 @@ load_win_status_data:
     iny
     cpy #57
     bne :-
+
+;4行目描画
+    lda #$23
+    sta $2006
+    lda #$2A
+    sta $2006
+
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #76
+    bne :-
+
+    lda player1_x
+    sta $2005       ;x
+    lda player1_y
+    sta $2005       ;y
+
+;nmiまってみる
+    lda count2
+:
+    cmp count2
+    beq :-
+
+;5行目描画
+    lda #$23
+    sta $2006
+    lda #$4A
+    sta $2006
+
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #95
+    bne :-
+
+;6行目描画
+    lda #$23
+    sta $2006
+    lda #$6A
+    sta $2006
+
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #114
+    bne :-
+
+;7行目描画
+    lda #$23
+    sta $2006
+    lda #$8A
+    sta $2006
+
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #133
+    bne :-
+
+;8行目描画
+    lda #$23
+    sta $2006
+    lda #$AA
+    sta $2006
+
+ :
+    lda win_status_data, y
+    sta $2007
+    iny
+    cpy #152
+    bne :-
+
 
     lda player1_x
     sta $2005       ;x
