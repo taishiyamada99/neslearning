@@ -102,10 +102,11 @@ LoadPalettes_Sprit:
     cpx #$10
     BNE LoadPalettes_Sprit
 
+
     ; Initialize world to point to world data
-    lda #<WorldData
+    lda #<WorldMap
     sta world
-    lda #>WorldData
+    lda #>WorldMap
     sta world+1
 
     ; setup addrss in PPU for nametable data ネームテーブルの生成 PPU $2000
@@ -119,23 +120,40 @@ LoadPalettes_Sprit:
     ldx #$00
     ldy #$00
 
-LoadWorld:
-    lda (world), y
+;worldの位置を変更
+    lda world
+    clc
+    adc #8
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+
+;BGの描画(初期)
+load_worldmap:
+    lda (world), y ;1秒分 32タイル読む
     sta $2007
     iny
-    cpx #$03
-    bne :+
-    cpy #$C0
-    BEQ DoneLoadingWorld
-:
-    cpy #$00
-    bne LoadWorld
-    inx 
-    inc world+1
-    jmp LoadWorld
+    cpy #$20
+    beq nextline_worldmap
 
-DoneLoadingWorld:
-    ldx #$00
+    jmp load_worldmap
+
+nextline_worldmap:
+    inx
+    cpx #30
+    beq done_loading_worldmap
+    lda world
+    clc
+    adc #48
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    ldy #$00
+    jmp load_worldmap
+
+done_loading_worldmap:
 
 SetAttributes:
     lda #$55
@@ -146,6 +164,7 @@ SetAttributes:
 
     ldx #$00
     ldy #$00
+
 
 SetWindowPosition:
     lda #$00
@@ -631,6 +650,9 @@ win_status_data:
 
 WorldData:
     .incbin "map01.bin"
+
+WorldMap:
+    .incbin "worldmap1.bin"
 
 .segment "VECTORS"
     .word nmi
