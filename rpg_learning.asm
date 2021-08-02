@@ -584,11 +584,43 @@ load_win_status_data:
     cpy #152
     bne :-
 
+;Att変更
+    lda #$23
+    sta $2006
+    lda #$EA
+    sta $2006
+
+    lda #%10000000
+    sta $2007
+
+    ldx #$EB
+:
+    lda #$23
+    sta $2006
+    stx $2006
+
+    lda #%10100000
+    sta $2007
+    inx
+    cpx #$EF
+    bne :-
+
+    lda #$23
+    sta $2006
+    lda #$EF
+    sta $2006
+
+    lda #%00100000
+    sta $2007
+
+
 
     lda player1_x
     sta $2005       ;x
     lda player1_y
     sta $2005       ;y
+
+
 
     rts
 
