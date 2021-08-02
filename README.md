@@ -18,13 +18,14 @@ Twitter [TaishiYamada99](https://twitter.com/TaishiYamada99) で日々の作成�
 ### Nesdev Wiki (英語) https://wiki.nesdev.com/w/index.php/Nesdev_Wiki
 英語だけど圧倒的な情報量。さすが世界中の強者たちが頼りにしている情報源という感じがする。ただし、本格的な解説すぎて最初はとっつきにくかった。少しファミコンの仕組みが分かってきてから読んでいくと、とても詳しい情報が書かれていて参考になる。
 
-### 魔法使いの森 - ファミコンの画面について
-https://www.wizforest.com/OldGood/ntsc/famicom.html
+### 魔法使いの森 - ファミコンの画面について https://www.wizforest.com/OldGood/ntsc/famicom.html
 画面の仕組みについて丁寧に書かれていて参考になった。
 
-### CC65(CA65) - 資料置き場
-http://orisari.cswiki.jp/index.php?CC65(CA65)
+### CC65(CA65) - 資料置き場 http://orisari.cswiki.jp/index.php?CC65(CA65)
 CA65についての文法とかも全く分からないときに出てきて参考にした情報。
+
+### Mnemonic6502 for NES http://web.archive.org/web/20070115161323/http://aqube.kir.jp/dsoft/famicom/6502.html
+すでにサイトはなくなっているようだけど、ページのアーカイブから。アドレッシングについてすごく丁寧に説明されていて参考になった。
 
 ## 各種ツール
 
