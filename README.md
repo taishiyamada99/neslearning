@@ -49,3 +49,6 @@ YY-CHR以外は英語です。ただし、どれも優秀なツールで、海�
 
 ### FamiTracker http://famitracker.com/
 ファミコンの音楽ファイルを作るためのソフトウェア。海外では、これが定番らしく、このFamiTrackerがエクスポートするファイルを読み込んで使える音源ドライバも色々な人が作成している。YouTubeでFamiTrackerで検索すると、実際にFamiTrackerで作成された音楽が多数でてくるので参考にもしやすい。
+
+### FamiStudio https://famistudio.org/
+FamiTrackerが2015年を最後に更新が止まっている中、このFamiStudioはよりモダンな作りなものとして2021年8月現在でも更新中。FamiTrackerより簡単に使えることを目指して設計されている一方で、機能についてはFamiTrackerよりも限定されているという説明が公式サイトに書かれている。
