@@ -471,7 +471,7 @@ load_win_status_data:
 ;1行目描画
     lda #$22
     sta $2006
-    lda #$CA
+    lda #$89
     sta $2006
 
     ldy #$00
@@ -485,7 +485,7 @@ load_win_status_data:
 ;2行目描画
     lda #$22
     sta $2006
-    lda #$EA
+    lda #$A9
     sta $2006
 
  :
@@ -496,9 +496,9 @@ load_win_status_data:
     bne :-
 
 ;3行目描画
-    lda #$23
+    lda #$22
     sta $2006
-    lda #$0A
+    lda #$C9
     sta $2006
 
  :
@@ -509,9 +509,9 @@ load_win_status_data:
     bne :-
 
 ;4行目描画
-    lda #$23
+    lda #$22
     sta $2006
-    lda #$2A
+    lda #$E9
     sta $2006
 
  :
@@ -535,7 +535,7 @@ load_win_status_data:
 ;5行目描画
     lda #$23
     sta $2006
-    lda #$4A
+    lda #$09
     sta $2006
 
  :
@@ -548,7 +548,7 @@ load_win_status_data:
 ;6行目描画
     lda #$23
     sta $2006
-    lda #$6A
+    lda #$29
     sta $2006
 
  :
@@ -561,7 +561,7 @@ load_win_status_data:
 ;7行目描画
     lda #$23
     sta $2006
-    lda #$8A
+    lda #$49
     sta $2006
 
  :
@@ -574,7 +574,7 @@ load_win_status_data:
 ;8行目描画
     lda #$23
     sta $2006
-    lda #$AA
+    lda #$69
     sta $2006
 
  :
@@ -585,33 +585,30 @@ load_win_status_data:
     bne :-
 
 ;Att変更
-    lda #$23
-    sta $2006
-    lda #$EA
-    sta $2006
-
-    lda #%10000000
-    sta $2007
-
-    ldx #$EB
+    ldx #$EA
 :
     lda #$23
     sta $2006
     stx $2006
 
-    lda #%10100000
+    lda #%10101010
     sta $2007
     inx
     cpx #$EF
     bne :-
 
+    ldx #$F2
+:
     lda #$23
     sta $2006
-    lda #$EF
-    sta $2006
+    stx $2006
 
-    lda #%00100000
+    lda #%10101010
     sta $2007
+    inx
+    cpx #$F7
+    bne :-
+
 
 
 
