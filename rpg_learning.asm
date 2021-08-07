@@ -19,6 +19,7 @@ DIST_LEFT = $18
     .byte $00, $00, $00, $00, $00 ; filler bytes
 
 .segment "ZEROPAGE"
+temp:           .res 1
 world:          .res 2
 buttons:        .res 1
 buttons1:       .res 1
@@ -32,6 +33,7 @@ player1_y:      .res 1
 player1_tile:   .res 1 ;タイル
 player1_dist:   .res 1 ;向き
 move_count:     .res 1 ;移動中かどうかの判定フラグ（カウンター）
+status_pos_addr:     .res 2
 
 .segment "STARTUP"
 Reset:
@@ -461,65 +463,42 @@ player_move_left:
 
 ;BGにステータスウインドウを表示（練習）
 load_win_status_data:
-
+    lda #$88
+    sta status_pos_addr
+    lda #$22
+    sta status_pos_addr+1
 ;nmiまってみる
     lda count2
 :
     cmp count2
     beq :-
-
-;1行目描画
-    lda #$22
-    sta $2006
-    lda #$88
-    sta $2006
-
+;各行の描画(ループ)
     ldy #$00
+load_win_status_data_b:  ;一度に描画しすぎると化けるので、4行ずつ描画
+    lda #4
+    sta temp
+load_win_status_data_a:
+    ldx #20
+    lda status_pos_addr+1 ;上位バイト
+    sta $2006
+    lda status_pos_addr ;下位バイト
+    sta $2006
  :
     lda win_status_data, y
     sta $2007
     iny
-    cpy #20
+    dex
     bne :-
 
-;2行目描画
-    lda #$22
-    sta $2006
-    lda #$A8
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #40
-    bne :-
-
-;3行目描画
-    lda #$22
-    sta $2006
-    lda #$C8
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #60
-    bne :-
-
-;4行目描画
-    lda #$22
-    sta $2006
-    lda #$E8
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #80
-    bne :-
+    lda status_pos_addr
+    clc
+    adc #$20
+    sta status_pos_addr
+    lda status_pos_addr+1
+    adc #00
+    sta status_pos_addr+1
+    dec temp
+    bne load_win_status_data_a
 
     lda player1_x
     sta $2005       ;x
@@ -532,58 +511,9 @@ load_win_status_data:
     cmp count2
     beq :-
 
-;5行目描画
-    lda #$23
-    sta $2006
-    lda #$08
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
+    clc
     cpy #100
-    bne :-
-
-;6行目描画
-    lda #$23
-    sta $2006
-    lda #$28
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #120
-    bne :-
-
-;7行目描画
-    lda #$23
-    sta $2006
-    lda #$48
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #140
-    bne :-
-
-;8行目描画
-    lda #$23
-    sta $2006
-    lda #$68
-    sta $2006
-
- :
-    lda win_status_data, y
-    sta $2007
-    iny
-    cpy #160
-    bne :-
-
+    bcc load_win_status_data_b
 ;Att変更
     ldx #$EA
 :
@@ -609,15 +539,10 @@ load_win_status_data:
     cpx #$F7
     bne :-
 
-
-
-
     lda player1_x
     sta $2005       ;x
     lda player1_y
     sta $2005       ;y
-
-
 
     rts
 
