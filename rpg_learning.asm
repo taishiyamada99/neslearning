@@ -104,7 +104,6 @@ LoadPalettes_Sprit:
     cpx #$10
     BNE LoadPalettes_Sprit
 
-
     ; Initialize world to point to world data
     lda #<WorldMap
     sta world
@@ -467,15 +466,14 @@ load_win_status_data:
     sta status_pos_addr
     lda #$22
     sta status_pos_addr+1
-;nmiまってみる
-    lda count2
+
+    ldy #$00            ;各行の描画(ループ)
+load_win_status_data_c:
+    lda count2          ;nmiまってみる
 :
     cmp count2
     beq :-
-;各行の描画(ループ)
-    ldy #$00
-load_win_status_data_b:  ;一度に描画しすぎると化けるので、4行ずつ描画
-    lda #4
+    lda #4              ;一度に描画しすぎると化けるので、4行ずつ描画
     sta temp
 load_win_status_data_a:
     ldx #20
@@ -489,7 +487,6 @@ load_win_status_data_a:
     iny
     dex
     bne :-
-
     lda status_pos_addr
     clc
     adc #$20
@@ -500,20 +497,14 @@ load_win_status_data_a:
     dec temp
     bne load_win_status_data_a
 
-    lda player1_x
-    sta $2005       ;x
+    lda player1_x       ;描画ポジションのセット
+    sta $2005
     lda player1_y
-    sta $2005       ;y
-
-;nmiまってみる
-    lda count2
-:
-    cmp count2
-    beq :-
-
-    clc
+    sta $2005
+    clc                 ;まだ途中か？の判定
     cpy #100
-    bcc load_win_status_data_b
+    bcc load_win_status_data_c
+
 ;Att変更
     ldx #$EA
 :
