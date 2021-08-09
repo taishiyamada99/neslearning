@@ -33,6 +33,8 @@ player1_y:      .res 1
 player1_tile:   .res 1 ;タイル
 player1_dist:   .res 1 ;向き
 move_count:     .res 1 ;移動中かどうかの判定フラグ（カウンター）
+pos_x:          .res 1
+pos_y:          .res 1
 status_pos_addr:     .res 2
 
 .segment "STARTUP"
@@ -306,6 +308,8 @@ BUTTON_RIGHT  = 1 << 0
 
     cmp #BUTTON_A
     beq a_down
+    cmp #BUTTON_B
+    beq b_down
 
     jmp nothing_joypad
 
@@ -343,10 +347,14 @@ DownRight_Down:
     jmp do_joypad
 
 DownLeft_Down:
-    jmp do_joypad
+
 
 a_down:
     jsr load_win_status_data
+    jmp do_joypad
+
+b_down:
+    jsr load_worldmap_1
     jmp do_joypad
 
 nothing_joypad:   ; 何も押されていないときの処理
@@ -356,6 +364,12 @@ do_joypad:  ;何か押された時の処理
     jmp MainLoop
 
 nmi:
+    pha         ;Aをスタックへ回避
+    txa         ;xをスタックへ回避
+    pha         
+    tya         ;yをスタックへ回避
+    pha
+
     inc count2
     inc count
     ;キャラ足踏み
@@ -369,6 +383,13 @@ sprit_dma:
     sta $2003
     lda #$02 ; copy sprite data from $0200 => PPU memory for display (DMA転送)
     sta $4014
+
+    pla         ;スタックからy,x,aへ戻す
+    tay
+    pla
+    tax
+    pla
+
     rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;ここから、サブルーチン
@@ -535,6 +556,78 @@ load_win_status_data_a:
     lda player1_y
     sta $2005       ;y
 
+    rts
+
+;BG画面をもとに戻す
+load_worldmap_1:
+    lda #00
+    sta pos_x
+    sta pos_y
+
+    lda #<WorldMap
+    sta world
+    lda #>WorldMap
+    sta world+1
+
+    ;worldの計算
+    ldy pos_y       ;pos_yとpos_xから、worldの値を計算 : y x 48 + x
+ :
+    dey
+    beq :+          ;yが0までループ
+    lda world
+    clc
+    adc #$30 ;48. MAP全体の横キャラ分
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    jmp :-
+:
+    lda pos_x       ;xを足す
+    clc
+    adc world
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+
+ 
+    lda #$20
+    sta $2006
+    lda #$00
+    sta $2006
+
+    ldx #30
+load_worldmap_1b:
+    ldy #$00
+:
+    lda (world), y ;32タイル読む
+    sta $2007
+    iny
+    cpy #$20
+    bne :-
+
+    lda count2          ;nmiまってみる
+:
+    cmp count2
+    beq :-
+
+    dex
+    beq done_loading_worldmap_1
+    lda world
+    clc
+    adc #48             ;workdmapの幅が48タイル。１行ズレるということ。
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    jmp load_worldmap_1b
+
+done_loading_worldmap_1:
+    lda player1_x
+    sta $2005       ;x
+    lda player1_y
+    sta $2005       ;y
     rts
 
 ; サウンド　矩形波;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
