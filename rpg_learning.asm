@@ -441,6 +441,7 @@ sub_player_dist_change:     ;キャラ向き変更
 :
     rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;BGスクロール(右に移動)
 player_move_right:
     lda #$00
