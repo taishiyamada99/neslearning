@@ -558,13 +558,13 @@ load_win_status_data_a:
 
     rts
 
-;BG画面をもとに戻す
+;BG画面をもとに戻す(任意の位置から描く)
 load_worldmap_1:
-    lda #00
+    lda #$00         ;テスト用なので$00で初期化
     sta pos_x
     sta pos_y
 
-    lda #<WorldMap
+    lda #<WorldMap      ;WorldMapデータの番地をworld(2bytes)に読ませる
     sta world
     lda #>WorldMap
     sta world+1
@@ -576,7 +576,7 @@ load_worldmap_1:
     beq :+          ;yが0までループ
     lda world
     clc
-    adc #$30 ;48. MAP全体の横キャラ分
+    adc #$30        ;48. WorldMap全体の横キャラ分
     sta world
     lda world+1
     adc #00
@@ -592,12 +592,12 @@ load_worldmap_1:
     sta world+1
 
  
-    lda #$20
+    lda #$20        ;nametable 01の最初の位置から書く
     sta $2006
     lda #$00
     sta $2006
 
-    ldx #30
+    ldx #30             ;30回ループ用
 load_worldmap_1b:
     ldy #$00
 :
@@ -612,8 +612,14 @@ load_worldmap_1b:
     cmp count2
     beq :-
 
+    lda #00
+    sta $2005       ;x
+    lda #00
+    sta $2005       ;y
+
     dex
     beq done_loading_worldmap_1
+
     lda world
     clc
     adc #48             ;workdmapの幅が48タイル。１行ズレるということ。
