@@ -607,15 +607,15 @@ load_worldmap_1b:
     cpy #$20
     bne :-
 
-    lda count2          ;nmiまってみる
-:
-    cmp count2
-    beq :-
-
     lda #00
     sta $2005       ;x
     lda #00
     sta $2005       ;y
+
+    lda count2          ;nmiまってみる
+:
+    cmp count2
+    beq :-
 
     dex
     beq done_loading_worldmap_1
