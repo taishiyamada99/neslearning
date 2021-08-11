@@ -113,7 +113,9 @@ LoadPalettes_Sprit:
     sta world+1
 
     ; setup addrss in PPU for nametable data ネームテーブルの生成 PPU $2000
+:
     BIT $2002
+    BPL :-
 
     lda #$20
     sta $2006
@@ -569,6 +571,11 @@ load_worldmap_1:
     sta world
     lda #>WorldMap
     sta world+1
+
+load_worldmap_1x:
+:
+    BIT $2002
+    BPL :-
 
     ;worldの計算
     ldy pos_y       ;pos_yとpos_xから、worldの値を計算 : y x 48 + x
