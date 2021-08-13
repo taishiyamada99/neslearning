@@ -13,6 +13,9 @@
 .segment "ZEROPAGE"
 temp:           .res 2
 nmi_count:      .res 1
+pos_y:          .res 1  ;主人公キャラの現在地Y
+pos_x:          .res 1  ;主人公キャラの現在地X
+world:          .res 2  ;worldmap読み込み時のaddr指定
 
 .segment "STARTUP"
 reset:
@@ -87,8 +90,32 @@ mainloop:
 
     jmp mainloop
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+map_drawing:
+
+;まだ途中
+;１）現在地座標から、worldmapの読み込む起点を計算
+;２）worldmapを32タイル読み込む（横１行分）
+;３）Y座標をずらす
+;４）２）に戻る。３０行書いたら終わり。
+
+    ldx pos_y
+:
+    clc
+    lda world
+    clc
+    adc #48
+    sta world
+
+    dex
+    bne :-
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nmi:
-    pha         ;スタックからy,x,aへ戻す
+    pha         ;スタックへy,x,aを退避
     txa
     pha         
     tya
@@ -108,6 +135,8 @@ sprit_dma:
     tax
     pla
     rti             ;nmi終了
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PaletteData_Sprit:
     .byte $0F,$11,$30,$36,$0F,$36,$25,$16  ;勇者標準、魔法使いーピンク
