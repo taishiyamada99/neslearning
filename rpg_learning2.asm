@@ -13,8 +13,12 @@
 .segment "ZEROPAGE"
 temp:           .res 2
 nmi_count:      .res 1
-pos_y:          .res 1  ;主人公キャラの現在地Y
-pos_x:          .res 1  ;主人公キャラの現在地X
+pos_x:          .res 1
+pos_y:          .res 1
+player_1_x:     .res 1
+player_1_y:     .res 1
+player_1_a:     .res 1
+player_1_b:     .res 1
 world:          .res 2  ;worldmap読み込み時のaddr指定
 
 .segment "STARTUP"
@@ -88,7 +92,7 @@ mainloop:
     bit $2002       ; wait for vblank
     bpl mainloop
 
-    jmp mainloop
+    jmp map_drawing
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -100,16 +104,73 @@ map_drawing:
 ;３）Y座標をずらす
 ;４）２）に戻る。３０行書いたら終わり。
 
+    lda #$10
+    sta pos_x
+    lda #$07
+    sta pos_y
+
+;１）現在地座標から、worldmapの読み込む起点を計算
+    lda #<worldmap          ;worldmapのデータの番地を読ませる
+    sta world
+    lda #>worldmap
+    sta world+1
+
     ldx pos_y
 :
-    clc
     lda world
     clc
     adc #48
     sta world
-
+    lda world+1
+    adc #00
+    sta world+1
     dex
     bne :-
+    clc
+    adc pos_x
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+
+
+;２）worldmapを32タイル読み込む（横１行分）
+
+    lda #$20        ;nametable $2000
+    sta $2006
+    lda #$00
+    sta $2006
+
+    ldx #30
+:
+    ldy #00
+:
+    lda (world), y
+    sta $2007
+    iny
+    cpy #32
+    bne :-
+
+;３）Y座標をずらす
+    dex
+    beq :+
+    lda world
+    clc
+    adc #48-32
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    jmp :--
+:
+
+    lda #00
+    sta $2005       ;x
+    lda #00
+    sta $2005       ;y
+
+loop:
+    jmp loop
 
 
 
@@ -150,7 +211,7 @@ PaletteData_BG:
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
 
-WorldMap:
+worldmap:
     .incbin "worldmap1.bin"
 
 .segment "VECTORS"
