@@ -30,9 +30,14 @@ reset:
     ldx #$FF        ; Initialize the stack register
     txs
     inx             ; #$FF + 1 => #$00
-    stx $2000       ; Zero out the PPU registers
-    stx $2001
     stx $4010
+
+;PPU初期化
+    lda #%00001000  ; NMI Disabled, BG $0000, CHR $1000, VRAMADDR +1
+    sta $2000
+    lda #%00000000  ; BG/Sprit Disabled
+    sta $2001
+
 :                   ; wait for vblank
     bit $2002
     bpl :-
@@ -81,12 +86,6 @@ clear_mem:
     jmp :-
 :
 
-;PPU初期化
-    lda #%10000100  ; enable NMI change BG $0000 Sprit $1000
-    sta $2000
-    lda #%00001110  ; Sprites: Disabled (bit4) / BG:Enabled (bit3 = true)
-    sta $2001
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 mainloop:
     bit $2002       ; wait for vblank
@@ -104,9 +103,9 @@ map_drawing:
 ;３）Y座標をずらす
 ;４）２）に戻る。３０行書いたら終わり。
 
-    lda #$10
+    lda #08
     sta pos_x
-    lda #$07
+    lda #08
     sta pos_y
 
 ;１）現在地座標から、worldmapの読み込む起点を計算
@@ -119,7 +118,7 @@ map_drawing:
 :
     lda world
     clc
-    adc #48
+    adc #128         ;64 x 2
     sta world
     lda world+1
     adc #00
@@ -128,6 +127,12 @@ map_drawing:
     bne :-
     clc
     adc pos_x
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    clc
+    adc pos_x       ;pos_x x 2 (2倍の値を入れる)
     sta world
     lda world+1
     adc #00
@@ -156,7 +161,7 @@ map_drawing:
     beq :+
     lda world
     clc
-    adc #48-32
+    adc #64
     sta world
     lda world+1
     adc #00
@@ -168,6 +173,12 @@ map_drawing:
     sta $2005       ;x
     lda #00
     sta $2005       ;y
+
+BG_Enabled:
+    lda #%00001000  ; NMI Disabled, BG $0000, CHR $1000, VRAMADDR +1
+    sta $2000
+    lda #%00001110  ; BG Enabled
+    sta $2001
 
 loop:
     jmp loop
@@ -212,7 +223,7 @@ PaletteData_BG:
     .byte $0F,$30,$10,$00,$0F,$30,$10,$00
 
 worldmap:
-    .incbin "worldmap1.bin"
+    .incbin "worldmap2.bin"
 
 .segment "VECTORS"
     .word nmi
