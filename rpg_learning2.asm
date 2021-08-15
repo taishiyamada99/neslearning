@@ -1,9 +1,9 @@
 .segment "HEADER"
     .byte "NES"
     .byte $1a
-    .byte $02 ; 2 * 16KByte PRG ROM
-    .byte $01 ; 1 * 8KByte CHR ROM
-    .byte %00000000 ; mapper and mirrorig
+    .byte $02 ; 2*16KBytes(32KBytes) PRG ROM
+    .byte $01 ; 1*8KBytes(8KBytes) CHR ROM
+    .byte %00000001 ; mapper and mirrorig (Virtical)
     .byte $00
     .byte $00
     .byte $00
@@ -11,15 +11,15 @@
     .byte $00, $00, $00, $00, $00 ; filler bytes
 
 .segment "ZEROPAGE"
-temp:           .res 2
+temp:           .res 2      ;一時的に使うための2byte変数
 nmi_count:      .res 1
-pos_x:          .res 1
-pos_y:          .res 1
+pos_x:          .res 1      ;主人公の座標x($00-$FF)
+pos_y:          .res 1      ;主人公の座標y($00-$FF)
 player_1_x:     .res 1
 player_1_y:     .res 1
 player_1_a:     .res 1
 player_1_b:     .res 1
-world:          .res 2  ;worldmap読み込み時のaddr指定
+world:          .res 2      ;worldmap読込時のaddr
 
 .segment "STARTUP"
 reset:
@@ -64,17 +64,29 @@ clear_mem:
     sta $4014
     nop
 
-;最初のBG描画
+;BG Palletsの読み込み
+load_pallets_bg:
+    lda #$3F        ; $3F00　BackGroud Palletsのロード先
+    sta $2006
+    lda #$00
+    sta $2006
+    ldx #$00
+:
+    lda PaletteData_BG, x ; PalletsDataの読み込み
+    sta $2007
+    inx
+    cpx #$10
+    bne :-
+
+;BGリセット(すべてFF)
     lda #$20        ;nametable $2000
     sta $2006
     lda #$00
     sta $2006
-
     lda #$C0        ;$03C0 = 960
     sta temp
     lda #$03
     sta temp+1
-
 :
     lda #$FF        ;nametableをすべてFFに
     sta $2007
@@ -86,27 +98,31 @@ clear_mem:
     jmp :-
 :
 
+
+;テスト用に初期値設定
+    lda #15         ;テスト用のデータ
+    sta pos_x
+    lda #05
+    sta pos_y
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-mainloop:
-    bit $2002       ; wait for vblank
-    bpl mainloop
+main:
+    jsr map_drawing ;初期マップ読み込み
 
-    jmp map_drawing
-
+loop:
+    jmp loop
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 map_drawing:
-
-;まだ途中
+;worldmapのうち、pos_x/pos_yの座標に基づいてworldmapを読み込む。画面は暗転。NMI一時停止。
 ;１）現在地座標から、worldmapの読み込む起点を計算
 ;２）worldmapを32タイル読み込む（横１行分）
-;３）Y座標をずらす
-;４）２）に戻る。３０行書いたら終わり。
 
-    lda #08
-    sta pos_x
-    lda #08
-    sta pos_y
+BG_Disabled:
+    lda #%00001000  ; NMI Disabled, BG $0000, CHR $1000, VRAMADDR +1
+    sta $2000
+    lda #%00000110  ; BG Disabled
+    sta $2001
 
 ;１）現在地座標から、worldmapの読み込む起点を計算
     lda #<worldmap          ;worldmapのデータの番地を読ませる
@@ -115,37 +131,37 @@ map_drawing:
     sta world+1
 
     ldx pos_y
+    beq :++
 :
     lda world
     clc
-    adc #128         ;64 x 2
+    adc #$80        ;64 x 2 = 128 = $80
     sta world
     lda world+1
     adc #00
     sta world+1
     dex
     bne :-
+:
+    lda pos_x
     clc
-    adc pos_x
+    adc world
     sta world
     lda world+1
     adc #00
     sta world+1
+    lda pos_x
     clc
-    adc pos_x       ;pos_x x 2 (2倍の値を入れる)
+    adc world
     sta world
     lda world+1
     adc #00
     sta world+1
-
-
 ;２）worldmapを32タイル読み込む（横１行分）
-
     lda #$20        ;nametable $2000
     sta $2006
     lda #$00
     sta $2006
-
     ldx #30
 :
     ldy #00
@@ -155,7 +171,6 @@ map_drawing:
     iny
     cpy #32
     bne :-
-
 ;３）Y座標をずらす
     dex
     beq :+
@@ -168,22 +183,17 @@ map_drawing:
     sta world+1
     jmp :--
 :
-
     lda #00
     sta $2005       ;x
     lda #00
     sta $2005       ;y
-
 BG_Enabled:
-    lda #%00001000  ; NMI Disabled, BG $0000, CHR $1000, VRAMADDR +1
+    lda #%10001000  ; NMI Enabled, BG $0000, CHR $1000, VRAMADDR +1
     sta $2000
     lda #%00001110  ; BG Enabled
     sta $2001
 
-loop:
-    jmp loop
-
-
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 nmi:
