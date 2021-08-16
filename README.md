@@ -55,3 +55,8 @@ YY-CHR以外は英語です。ただし、どれも優秀なツールで、海�
 
 ### FamiStudio https://famistudio.org/
 FamiTrackerが2015年を最後に更新が止まっている中、このFamiStudioはよりモダンな作りなものとして2021年8月現在でも更新中。FamiTrackerより簡単に使えることを目指して設計されている一方で、機能についてはFamiTrackerよりも限定されているという説明が公式サイトに書かれている。
+
+## 各種ツール（ハードウェア）
+
+### FC Cartridge bus simulator "tuna" IMPACT SOFT版 完成品 https://impactsoft.booth.pm/items/3025963
+Kazzoというカートリッジ読み書き用のハードウェア。その改良互換品がtuna。そのtunaをベースに作られているのがこちら。PCにUSB接続して、カートリッジを読書きできる。もちろん、書き込むにはFlashメモリを搭載したカートリッジが専用の必要。Impact SoftさんでもMapper0版の書き込みできるカートリッジも販売されています。
