@@ -109,8 +109,96 @@ load_pallets_bg:
 main:
     jsr map_drawing ;初期マップ読み込み
 
-loop:
-    jmp loop
+loop1:
+    lda nmi_count
+    adc #$33
+:
+    sta temp
+    cmp nmi_count
+    bne :-
+
+;縦スクロール練習
+
+BG_Scroll_Y:
+
+;１）現在地座標から、worldmapの読み込む起点を計算
+    lda #<worldmap          ;worldmapのデータの番地を読ませる
+    sta world
+    lda #>worldmap
+    sta world+1
+
+    lda pos_y
+    adc #14
+    tax
+    beq :++
+:
+    lda world
+    clc
+    adc #$80        ;64 x 2 = 128 = $80
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    dex
+    bne :-
+:
+    lda pos_x
+    clc
+    adc world
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    lda pos_x
+    clc
+    adc world
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+
+;２）worldmapを32タイル読み込む（横１行分）
+    lda #$20        ;nametable $2000
+    sta $2006
+    lda #$00
+    sta $2006
+    ldx #2         ;2行だけ書き足す
+:
+    ldy #00
+:
+    lda (world), y
+    sta $2007
+    iny
+    cpy #32
+    bne :-
+;３）Y座標をずらす
+    dex
+    beq :+
+    lda world
+    clc
+    adc #64
+    sta world
+    lda world+1
+    adc #00
+    sta world+1
+    jmp :--
+:
+
+    ldx #01
+:                   ; wait for vblank
+    bit $2002
+    bpl :-
+
+    lda #00
+    sta $2005       ;x
+    inx
+    stx $2005       ;y
+    cpx #16
+    bne :-
+
+loop2:
+    jmp loop2
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 map_drawing:
