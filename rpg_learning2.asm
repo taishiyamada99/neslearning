@@ -20,6 +20,9 @@ player_1_y:     .res 1
 player_1_a:     .res 1
 player_1_b:     .res 1
 world:          .res 2      ;worldmap読込時のaddr
+scroll_x:       .res 1      ;$2005に読ませるScrool位置 x
+scroll_y:       .res 1      ;$2005に読ませるScrool位置 y
+scroll_temp:    .res 1      ;scrollのtemp
 
 .segment "STARTUP"
 reset:
@@ -102,24 +105,42 @@ load_pallets_bg:
 ;テスト用に初期値設定
     lda #15         ;テスト用のデータ
     sta pos_x
-    lda #05
+    lda #00
     sta pos_y
+
+    lda #00
+    sta scroll_x
+    sta scroll_y
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 main:
     jsr map_drawing ;初期マップ読み込み
 
 loop1:
-    lda nmi_count
-    adc #$33
+
 :
-    sta temp
+    lda nmi_count   ;適当なウエイトここから
+:
     cmp nmi_count
-    bne :-
+    beq :-          ;適当なウエイトここまで
+    dec temp
+    bne :--
+
+    jsr bg_scroll_y
+    inc pos_y
+    lda pos_y
+    cmp #32
+    bne :+
+    lda #00
+    sta pos_y
+:
+    lda #60
+    sta temp
+    jmp loop1
 
 ;縦スクロール練習
 
-BG_Scroll_Y:
+bg_scroll_y:
 
 ;１）現在地座標から、worldmapの読み込む起点を計算
     lda #<worldmap          ;worldmapのデータの番地を読ませる
@@ -128,6 +149,7 @@ BG_Scroll_Y:
     sta world+1
 
     lda pos_y
+    clc
     adc #14
     tax
     beq :++
@@ -183,21 +205,18 @@ BG_Scroll_Y:
     sta world+1
     jmp :--
 :
-
-    ldx #01
-:                   ; wait for vblank
-    bit $2002
-    bpl :-
-
-    lda #00
+    lda #16
+    sta scroll_temp
+:
+    lda scroll_x
     sta $2005       ;x
-    inx
-    stx $2005       ;y
-    cpx #16
+    inc scroll_y
+    lda scroll_y
+    sta $2005       ;y
+    dec scroll_temp
     bne :-
 
-loop2:
-    jmp loop2
+    rts
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
