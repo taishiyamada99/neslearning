@@ -23,6 +23,7 @@ world:          .res 2      ;worldmap読込時のaddr
 scroll_x:       .res 1      ;$2005に読ませるScrool位置 x
 scroll_y:       .res 1      ;$2005に読ませるScrool位置 y
 scroll_temp:    .res 1      ;scrollのtemp
+nametable_addr: .res 2      ;nametableの書き込みをするaddr
 
 .segment "STARTUP"
 reset:
@@ -112,6 +113,11 @@ load_pallets_bg:
     sta scroll_x
     sta scroll_y
 
+    lda #$00
+    sta nametable_addr
+    lda #$20
+    sta nametable_addr+1
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 main:
     jsr map_drawing ;初期マップ読み込み
@@ -179,10 +185,15 @@ bg_scroll_y:
     adc #00
     sta world+1
 
+;1b) nametableのaddrを計算
+
+
+
+
 ;２）worldmapを32タイル読み込む（横１行分）
-    lda #$20        ;nametable $2000
+    lda nametable_addr+1        ;nametable $2000
     sta $2006
-    lda #$00
+    lda nametable_addr
     sta $2006
     ldx #2         ;2行だけ書き足す
 :
@@ -205,6 +216,7 @@ bg_scroll_y:
     sta world+1
     jmp :--
 :
+
     lda #16
     sta scroll_temp
 :
