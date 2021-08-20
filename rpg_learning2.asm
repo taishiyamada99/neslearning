@@ -191,10 +191,23 @@ bg_scroll_y:
 
 ;1b) nametableのaddrを計算
     
+    inc nt_y
+    lda #30
+    cmp nt_y
+    bne :+
+
+    lda #00
+    sta nametable_addr
+    lda #20
+    sta nametable_addr+1
+    jmp :++
+
+:
     lda nametable_addr
     clc
     adc #$40
-    sta nametable_addr
+    sta nametable_addr      ;nt_yが30超えたら0に戻す
+:
 
 ;２）worldmapを32タイル読み込む（横１行分）
     lda nametable_addr+1        ;nametable $2000
