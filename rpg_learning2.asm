@@ -144,9 +144,16 @@ loop1:
     lda #00
     sta pos_y
 :
-    lda #60
+    lda #$30
     sta temp
+    lda pos_y
+    cmp #7
+    beq loop
     jmp loop1
+
+loop:
+    jmp loop
+
 
 ;縦スクロール練習
 
@@ -158,11 +165,11 @@ bg_scroll_y:
     lda #>worldmap
     sta world+1
 
-    lda pos_y
+    lda pos_y               ;pos_yを読み込む
     clc
-    adc #14
-    tax
-    beq :++
+    adc #$10
+    tax                     ;pos_yの数だけxでループ
+    beq :++                 ;xが0ならジャンプ
 :
     lda world
     clc
